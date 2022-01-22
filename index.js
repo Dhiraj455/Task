@@ -5,14 +5,12 @@ const expresshandlebars = require('express-handlebars');
 const path = require('path');
 const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 const bodyparser = require('body-parser');
-const bcrypt = require('bcrypt');
 const UserController = require('./controllers/userController');
-
 const app = express();
 
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
-
+app.use(express.static(__dirname + '/public'));
 app.set('views', path.join(__dirname, '/views/'));
 app.engine('hbs', expresshandlebars.engine({
     handlebars: allowInsecurePrototypeAccess(handlebars),
@@ -24,7 +22,7 @@ app.engine('hbs', expresshandlebars.engine({
 app.set('view engine', 'hbs');
 
 app.get('/', (req, res) => {
-    res.send('<div class="box1"><h1>Welcome Guys</h1> <a class="btn btn-secondary" href="/signup">Signup</a> <a class="btn btn-secondary" href="/login">SignIn</a></div>');
+    res.send('<link rel="stylesheet" href="css/style.css"><div class="box1"><h1>Welcome Guys</h1> <a class="btn btn-secondary" href="/signup">Signup</a> <a class="btn btn-secondary" href="/login">SignIn</a></div>');
 })
 
 app.use('/',UserController)

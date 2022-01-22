@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { networkInterfaces } = require('os');
 const mongoose = require('mongoose');
 const pser = mongoose.model('User');
 const counts = mongoose.model('Count');
@@ -8,10 +9,13 @@ const reqip = require('@supercharge/request-ip');
 const { count } = require('../models/user.model');
 // const User = require('../models/user.model');
 siteviews = function () {
-    visits.findByIdAndUpdate('61ebe328c4c779430d55c026', { $inc: { count: 1 } }, { new: true }).then((data) => {
-        console.log(data.count);
-    }).catch((eer) => {
-        console.log(eer);
+    visits.findByIdAndUpdate('61ebe328c4c779430d55c026', { $inc: { count: 1 } }, { new: true },(eer,data) => {
+        if(!eer){
+            console.log(data.count);
+        }
+        else{
+            console.log("Error");
+        }
     })
 }
 router.get('/signup', (req, res) => {
@@ -30,10 +34,10 @@ router.get('/count', (req, res) => {
 router.get('/dashboard', (req, res) => {
     counts.find({}, function (err, doc) {
         if (!err) {
-            visits.findOne({_id:'61ebe328c4c779430d55c026'},(eer,data)=>{
-                res.render("user/dashboard",{
-                    list:doc,
-                    counter:data.count
+            visits.findOne({ _id: '61ebe328c4c779430d55c026' }, (eer, data) => {
+                res.render("user/dashboard", {
+                    list: doc,
+                    counter: data.count
                 })
             })
         }
@@ -123,7 +127,7 @@ router.get('/userprofile/:id', (req, res) => {
 })
 router.get('/edit/:id', (req, res) => {
     try {
-        pser.findById(req.params.id,(eer, doc) => {
+        pser.findById(req.params.id, (eer, doc) => {
             if (!eer) {
                 res.render('user/edit', {
                     id: doc._id,
@@ -146,8 +150,8 @@ router.get('/edit/:id', (req, res) => {
 router.post('/edit/:id', (req, res) => {
     var id = req.params.id;
     const user1 = new pser;
-        try {
-        pser.findByIdAndUpdate(id,req.body,{new: true},(eer) => {
+    try {
+        pser.findByIdAndUpdate(id, req.body, { new: true }, (eer) => {
             if (!eer) {
                 res.redirect('/userprofile/' + id);
             }
@@ -161,12 +165,25 @@ router.post('/edit/:id', (req, res) => {
     }
 })
 router.post('/count', (req, res) => {
-    var clientIp = reqip.getClientIp(req);
+    const nets = networkInterfaces();
+    const results = Object.create(null);
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                if (!results[name]) {
+                    results[name] = [];
+                }
+                results[name].push(net.address);
+            }
+        }
+    }
+    // console.log(results["Local Area Connection* 2"][0]);
+    // var clientIp = reqip.getClientIp(req);
     // var id = req.body.id
     try {
         const cuser = new counts({
             id: req.body.id,
-            ip: clientIp,
+            ip: results["Local Area Connection* 2"][0],
         })
         console.log("posted");
         cuser.save();
