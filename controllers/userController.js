@@ -6,18 +6,9 @@ const pser = mongoose.model('User');
 const counts = mongoose.model('Count');
 const visits = mongoose.model('Visit');
 const reqip = require('@supercharge/request-ip');
-const { count } = require('../models/user.model');
-// const User = require('../models/user.model');
-siteviews = function () {
-    visits.findByIdAndUpdate('61ebe328c4c779430d55c026', { $inc: { count: 1 } }, { new: true },(eer,data) => {
-        if(!eer){
-            console.log(data.count);
-        }
-        else{
-            console.log("Error");
-        }
-    })
-}
+router.get('/',(req,res)=>{
+    res.render('user/index');
+})
 router.get('/signup', (req, res) => {
     res.render('user/signup');
 })
@@ -27,8 +18,45 @@ router.get('/login', (req, res) => {
 router.get('/userprofile', (req, res) => {
     res.render('user/userprofile');
 })
+function views () {
+    visits.findByIdAndUpdate('61ebe328c4c779430d55c026', { $inc: { count: 1 } }, { new: true },(eer,data) => {
+        if(!eer){
+            console.log(data.count);
+        }
+        else{
+            console.log("Error");
+        }
+    })
+}
 router.get('/count', (req, res) => {
-    siteviews();
+    views();
+    const nets = networkInterfaces();
+    const results = Object.create(null);
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                if (!results[name]) {
+                    results[name] = [];
+                }
+                results[name].push(net.address);
+            }
+        }
+    }
+    // console.log(results["Local Area Connection* 2"][0]);
+    // var clientIp = reqip.getClientIp(req);
+    // var id = req.body.id
+    try {
+        const cuser = new counts({
+            id: req.body.id,
+            ip: results["Local Area Connection* 2"][0],
+        })
+        console.log("posted");
+        cuser.save();
+    }
+    catch (error) {
+        console.log(error);
+        res.redirect('/count');
+    }
     res.render('user/count');
 })
 router.get('/dashboard', (req, res) => {
@@ -165,33 +193,6 @@ router.post('/edit/:id', (req, res) => {
     }
 })
 router.post('/count', (req, res) => {
-    const nets = networkInterfaces();
-    const results = Object.create(null);
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            if (net.family === 'IPv4' && !net.internal) {
-                if (!results[name]) {
-                    results[name] = [];
-                }
-                results[name].push(net.address);
-            }
-        }
-    }
-    // console.log(results["Local Area Connection* 2"][0]);
-    // var clientIp = reqip.getClientIp(req);
-    // var id = req.body.id
-    try {
-        const cuser = new counts({
-            id: req.body.id,
-            ip: results["Local Area Connection* 2"][0],
-        })
-        console.log("posted");
-        cuser.save();
-        res.redirect('/dashboard');
-    }
-    catch (error) {
-        console.log(error);
-        res.redirect('/count');
-    }
+    res.redirect('/dashboard');
 })
 module.exports = router;

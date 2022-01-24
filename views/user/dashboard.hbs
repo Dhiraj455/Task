@@ -1,8 +1,16 @@
+<div class="box">
 <h2>Views : {{counter}}</h2>
+<table class="table table-dark table-hover table-bordered">
+    <tr>
+    <th class="table-dark">IP ADDRESS</th>
+    <th class="table-dark">TIMESTAMPS</th>
+    </tr>
 {{#each list}}
-<h3>{{ip}}</h3>
-<h3>{{createdAt}}</h3>
-<hr>
-<br>
+<tr>
+    <td>{{ip}}</td>
+    <td>{{createdAt}}</td>
+</tr>
 {{/each}}
+</table>
 <a href="/login"><button type="submit" class="btn btn-primary">Signout</button></a>
+</div>
